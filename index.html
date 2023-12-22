@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <audio id="audio1" src="./voice/1.mp3"></audio>
+  <audio id="audio2" src="./voice/2.mp3"></audio>
+  <audio id="audio3" src="./voice/3.mp3"></audio>
+  <audio id="audio4" src="./voice/4.mp3"></audio>
+  <audio id="audio5" src="./voice/5.mp3"></audio>
+  <audio id="audio6" src="./voice/6.mp3"></audio>
+  <audio id="audio7" src="./voice/7.mp3"></audio>
+  <audio id="audio8" src="./voice/8.mp3"></audio>
+  <audio id="audio9" src="./voice/9.mp3"></audio>
+  <audio id="audio10" src="./voice/10.mp3"></audio>
+  <audio id="audio11" src="./voice/11.mp3"></audio>
+  <audio id="audio12" src="./voice/12.mp3"></audio>
+  <style>
+    .container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .row {
+      width: 555px;
+      height: 400px;
+      background: lightblue;
+      margin: auto;
+      text-align: center;
+      border: 1px solid #333;
+    }
+
+
+    .card {
+      width: 60px;
+      height: 90px;
+      position: relative;
+      float: left;
+      margin: 16px;
+      transform-style: preserve-3d;
+      transition: transform 1s;
+    }
+
+    .card-front {
+      width: 100%;
+      height: 100%;
+      background-image: url(./picture/1.png);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      position: absolute;
+      backface-visibility: hidden;
+    }
+
+    .card-back {
+      width: 100%;
+      height: 100%;
+      background-image: url(./picture/聲.png);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      position: absolute;
+      transform: rotateY(180deg);
+      backface-visibility: hidden;
+    }
+
+    .card-close {
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div id="game">
+        <h1>猜猜他是誰?</h1>
+        <p>注意音量</p>
+      </div>
+      <audio class="audio" id="audio"></audio>
+    </div>
+  </div>
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.all.min.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js'
+    integrity='sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=='
+    crossorigin='anonymous'></script>
+  <script>
+    for (let i = 0; i < 12; i++) {
+      $('#game').append(`
+        <div class="card card-close">
+          <div class="card-front" data-number="${i + 1}"></div>
+          <div class="card-back"></div>
+        </div>
+      `)
+    }
+
+    $('.card').each(function (index) {
+      const number = index + 1
+      console.log(index, number)
+      $(this).find('.card-front').css('background-image', `url(./picture/${number}.png)`)
+
+      $(this).attr('data-number', parseInt(number));
+    })
+
+    for (let i = 0; i < 20; i++) {
+      const randomA = Math.round(Math.random() * 12)
+      const randomB = Math.round(Math.random() * 12)
+      $('.card').eq(randomA).insertAfter($('.card').eq(randomB))
+    }
+
+    $('#game').on('click', '.card', function () {
+      if (
+        $('.card:not(.card-close)').length < 2 &&
+        $(this).hasClass('card-close') &&
+        !$(this).hasClass('card-ok')
+      ) {
+        const cardNumber = $(this).find('.card-front').attr('data-number');
+        playSound(cardNumber);
+        $(this).removeClass('card-close')
+      }
+
+
+      if ($('.card:not(.card-close)').length === 2) {
+        const firstCard = adjustNumber(parseInt($('.card:not(.card-close)').eq(0).attr('data-number')));
+        const secondCard = adjustNumber(parseInt($('.card:not(.card-close)').eq(1).attr('data-number')));
+        if (firstCard === secondCard) {
+          $('.card:not(.card-close)').addClass('card-ok');
+          $('.card:not(.card-close)').fadeTo(1000, 0);
+        }
+
+        function adjustNumber(number) {
+          return (number > 6) ? (number - 6) : number;
+        }
+
+        setTimeout(function () {
+          $('.card:not(.card-close)').addClass('card-close');
+          if ($('.card-ok').length === $('.card').length) {
+            Swal.fire("過關");
+          }
+        }, 2000)
+      }
+    })
+
+    function playSound(cardNumber) {
+      console.log(`Playing sound for card ${cardNumber}`);
+      const audioElement = document.getElementById(`audio${cardNumber}`);
+      if (audioElement) {
+        audioElement.play();
+      }
+    }
+
+  </script>
+</body>
+
+</html>
